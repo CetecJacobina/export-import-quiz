@@ -1,3 +1,4 @@
+
 // Função de Exportação
 function exportarQuiz() {
     const quizData = {
@@ -88,6 +89,35 @@ function importarQuiz() {
     });
 
     input.click();
+}
+
+function aguardarCriacaoQuestoesEclicarSalvar() {
+    const totalEsperado = document.querySelectorAll('textarea[name="pergunta"]').length;
+    
+    let tentativas = 0;
+    const maxTentativas = 20; // Define um limite para evitar loops infinitos
+
+    const intervalo = setInterval(() => {
+        const totalAtual = document.querySelectorAll('textarea[name="pergunta"]').length;
+
+        console.log(`Tentativa ${tentativas + 1}: Criadas ${totalAtual}/${totalEsperado} questões`);
+
+        if (totalAtual >= totalEsperado || tentativas >= maxTentativas) {
+            clearInterval(intervalo);
+            console.log("Todas as questões foram criadas. Clicando no botão Salvar...");
+
+            const botaoSalvar = [...document.querySelectorAll("#btnSalvar")]
+                .find(btn => btn.textContent.trim() === "Salvar");
+
+            if (botaoSalvar) {
+                botaoSalvar.click();
+            } else {
+                console.log("Botão 'Salvar' não encontrado.");
+            }
+        }
+
+        tentativas++;
+    }, 500); // Verifica a cada 500ms
 }
 
 function preencherQuestoes(quizData) {
