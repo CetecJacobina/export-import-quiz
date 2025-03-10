@@ -90,7 +90,6 @@ function importarQuiz() {
     input.click();
 }
 
-// Função para preencher as questões após todas terem sido criadas
 function preencherQuestoes(quizData) {
     setTimeout(() => {
         const perguntas = document.querySelectorAll('textarea[name="pergunta"]');
@@ -111,13 +110,25 @@ function preencherQuestoes(quizData) {
             }
         });
 
-        // Salvar todas as questões
+        // Aguarda um tempo para garantir que os campos foram preenchidos antes de salvar
         setTimeout(() => {
+            // Clica em todos os botões de salvar questões individuais
             document.querySelectorAll(".salvar-pergunta").forEach(botao => botao.click());
-        }, 1000);
 
-    }, 2000);
+            // Aguarda mais tempo para garantir que todas as questões foram salvas antes de clicar no botão principal
+            setTimeout(() => {
+                const botaoSalvar = [...document.querySelectorAll(".ladda-label")]
+                    .find(btn => btn.textContent.trim() === "Salvar");
+
+                if (botaoSalvar) botaoSalvar.click();
+
+            }, 3000); // Ajuste esse tempo conforme necessário para garantir que todas as questões tenham sido salvas
+
+        }, 1000); // Tempo para salvar as questões individuais
+
+    }, 2000); // Tempo extra para garantir que os campos foram criados antes do preenchimento
 }
+
 
 // Criar os botões APÓS a definição das funções
 const titulos = document.querySelectorAll(".portlet-title");
