@@ -39,7 +39,7 @@ function exportarQuiz() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = ${quizData.tituloAbreviado}.json;
+    a.download = `${quizData.tituloAbreviado}.json`;
     a.click();
     URL.revokeObjectURL(url);
 }
@@ -71,13 +71,12 @@ function importarQuiz() {
             function criarProximaQuestao(faltando) {
                 if (faltando > 0) {
                     document.querySelector("#criar-pergunta").click();
-                    setTimeout(() => criarProximaQuestao(faltando - 1), 500); // Espera 500ms antes de criar a próxima questão
+                    setTimeout(() => criarProximaQuestao(faltando - 1), 500);
                 } else {
                     preencherQuestoes(quizData);
                 }
             }
 
-            // Criar questões se necessário
             if (questoesFaltando > 0) {
                 criarProximaQuestao(questoesFaltando);
             } else {
@@ -117,26 +116,36 @@ function preencherQuestoes(quizData) {
             document.querySelectorAll(".salvar-pergunta").forEach(botao => botao.click());
         }, 1000);
 
-    }, 2000); // Tempo extra para garantir que os campos foram criados antes do preenchimento
+    }, 2000);
 }
 
-// Criar botões para exportar/importar
-const btnExportar = document.createElement("button");
-btnExportar.textContent = "Exportar Quiz";
-btnExportar.style.position = "fixed";
-btnExportar.style.top = "10px";
-btnExportar.style.left = "10px";
-btnExportar.style.padding = "15px";
-btnExportar.style.zIndex = "9999";
-btnExportar.addEventListener("click", exportarQuiz);
-document.body.appendChild(btnExportar);
+// Criar os botões APÓS a definição das funções
+const titulos = document.querySelectorAll(".portlet-title");
 
-const btnImportar = document.createElement("button");
-btnImportar.textContent = "Importar Quiz";
-btnImportar.style.position = "fixed";
-btnImportar.style.top = "10px";
-btnImportar.style.padding = "15px";
-btnImportar.style.left = "150px";
-btnImportar.style.zIndex = "9999";
-btnImportar.addEventListener("click", importarQuiz);
-document.body.appendChild(btnImportar);
+titulos.forEach(titulo => {
+    if (titulo.textContent.trim() === "Editar Quiz") {
+        // Criar um container para os botões
+        const containerBotoes = document.createElement("div");
+        containerBotoes.style.display = "flex";
+        containerBotoes.style.gap = "10px"; // Espaçamento entre os botões
+        containerBotoes.style.marginLeft = "auto"; // Alinha à direita
+        containerBotoes.style.justifyContent = "flex-end";
+
+        // Criar botão de Exportação
+        const btnExportar = document.createElement("button");
+        btnExportar.textContent = "Exportar Quiz";
+        btnExportar.style.padding = "10px";
+        btnExportar.addEventListener("click", exportarQuiz);
+        containerBotoes.appendChild(btnExportar);
+
+        // Criar botão de Importação
+        const btnImportar = document.createElement("button");
+        btnImportar.textContent = "Importar Quiz";
+        btnImportar.style.padding = "10px";
+        btnImportar.addEventListener("click", importarQuiz);
+        containerBotoes.appendChild(btnImportar);
+
+        // Adicionar o container de botões à div do título
+        titulo.appendChild(containerBotoes);
+    }
+});
