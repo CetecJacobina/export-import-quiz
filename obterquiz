@@ -117,7 +117,7 @@ function preencherQuestoes(quizData) {
 
             // Aguarda mais tempo para garantir que todas as questões foram salvas antes de clicar no botão principal
             setTimeout(() => {
-                const botaoSalvar = [...document.querySelectorAll(".ladda-label")]
+                const botaoSalvar = [...document.querySelectorAll("#btnSalvar")]
                     .find(btn => btn.textContent.trim() === "Salvar");
 
                 if (botaoSalvar) botaoSalvar.click();
