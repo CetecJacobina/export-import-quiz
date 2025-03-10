@@ -121,22 +121,35 @@ function preencherQuestoes(quizData) {
 }
 
 // Criar botões para exportar/importar
+const containerBotoes = document.createElement("div");
+containerBotoes.style.position = "fixed";
+containerBotoes.style.top = "10px";
+containerBotoes.style.left = "10px";
+containerBotoes.style.zIndex = "9999";
+document.body.appendChild(containerBotoes);
+
 const btnExportar = document.createElement("button");
 btnExportar.textContent = "Exportar Quiz";
-btnExportar.style.position = "fixed";
-btnExportar.style.top = "10px";
-btnExportar.style.left = "10px";
-btnExportar.style.padding = "15px";
-btnExportar.style.zIndex = "9999";
+btnExportar.style.padding = "10px";
+btnExportar.style.marginRight = "10px";
 btnExportar.addEventListener("click", exportarQuiz);
-document.body.appendChild(btnExportar);
+containerBotoes.appendChild(btnExportar);
 
 const btnImportar = document.createElement("button");
 btnImportar.textContent = "Importar Quiz";
-btnImportar.style.position = "fixed";
-btnImportar.style.top = "10px";
-btnExportar.style.padding = "15px";
-btnImportar.style.left = "150px";
-btnImportar.style.zIndex = "9999";
+btnImportar.style.padding = "10px";
 btnImportar.addEventListener("click", importarQuiz);
-document.body.appendChild(btnImportar);
+containerBotoes.appendChild(btnImportar);
+
+// Botão para mostrar/ocultar os botões
+const btnToggle = document.createElement("button");
+btnToggle.textContent = "Mostrar/Ocultar Botões";
+btnToggle.style.padding = "10px";
+btnToggle.style.marginLeft = "10px";
+btnToggle.addEventListener("click", function () {
+    const botoes = [btnExportar, btnImportar];
+    botoes.forEach(botao => {
+        botao.style.display = botao.style.display === "none" ? "inline-block" : "none";
+    });
+});
+containerBotoes.appendChild(btnToggle);
