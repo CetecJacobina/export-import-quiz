@@ -1,0 +1,140 @@
+// Função de Exportação
+function exportarQuiz() {
+    const quizData = {
+        titulo: document.querySelector('input[name="titulo"]').value,
+        tituloAbreviado: document.querySelector('input[name="titulo_abreviado"]').value,
+        numeroQuestoes: document.querySelectorAll('textarea[name="pergunta"]').length,
+        questoes: []
+    };
+
+    const perguntas = document.querySelectorAll('textarea[name="pergunta"]');
+    const respostas = document.querySelectorAll('textarea[name^="resposta"]');
+    const radios = document.querySelectorAll('input[type="radio"]');
+
+    perguntas.forEach((pergunta, i) => {
+        const questao = {
+            pergunta: pergunta.value,
+            respostas: [],
+            correta: null
+        };
+
+        for (let j = 0; j < 5; j++) {
+            const respostaIndex = (i * 5) + j;
+            if (respostas[respostaIndex]) {
+                questao.respostas.push(respostas[respostaIndex].value);
+            }
+        }
+
+        for (let j = 0; j < 4; j++) {
+            const radioIndex = (i * 4) + j;
+            if (radios[radioIndex] && radios[radioIndex].checked) {
+                questao.correta = j;
+            }
+        }
+
+        quizData.questoes.push(questao);
+    });
+
+    const blob = new Blob([JSON.stringify(quizData)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${quizData.tituloAbreviado}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+// Função de Importação
+function importarQuiz() {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "application/json";
+
+    input.addEventListener("change", (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const quizData = JSON.parse(e.target.result);
+
+            // Preencher os títulos
+            document.querySelector('input[name="titulo"]').value = quizData.titulo;
+            document.querySelector('input[name="titulo_abreviado"]').value = quizData.tituloAbreviado;
+
+            // Verifica o número de questões já criadas na página
+            const numeroDeQuestoesCriadas = document.querySelectorAll('textarea[name="pergunta"]').length;
+
+            // Criar as questões restantes
+            const questoesFaltando = quizData.numeroQuestoes - numeroDeQuestoesCriadas;
+
+            function criarProximaQuestao(faltando) {
+                if (faltando > 0) {
+                    document.querySelector("#criar-pergunta").click();
+                    setTimeout(() => criarProximaQuestao(faltando - 1), 500); // Espera 500ms antes de criar a próxima questão
+                } else {
+                    preencherQuestoes(quizData);
+                }
+            }
+
+            // Criar questões se necessário
+            if (questoesFaltando > 0) {
+                criarProximaQuestao(questoesFaltando);
+            } else {
+                preencherQuestoes(quizData);
+            }
+        };
+
+        reader.readAsText(file);
+    });
+
+    input.click();
+}
+
+// Função para preencher as questões após todas terem sido criadas
+function preencherQuestoes(quizData) {
+    setTimeout(() => {
+        const perguntas = document.querySelectorAll('textarea[name="pergunta"]');
+        const respostas = document.querySelectorAll('textarea[name^="resposta"]');
+        const radios = document.querySelectorAll('input[type="radio"]');
+
+        quizData.questoes.forEach((questao, i) => {
+            if (perguntas[i]) perguntas[i].value = questao.pergunta;
+
+            questao.respostas.forEach((resposta, j) => {
+                const respostaIndex = (i * 5) + j;
+                if (respostas[respostaIndex]) respostas[respostaIndex].value = resposta;
+            });
+
+            if (questao.correta !== null) {
+                const radioIndex = (i * 4) + questao.correta;
+                if (radios[radioIndex]) radios[radioIndex].checked = true;
+            }
+        });
+
+        // Salvar todas as questões
+        setTimeout(() => {
+            document.querySelectorAll(".salvar-pergunta").forEach(botao => botao.click());
+        }, 1000);
+
+    }, 2000); // Tempo extra para garantir que os campos foram criados antes do preenchimento
+}
+
+// Criar botões para exportar/importar
+const btnExportar = document.createElement("button");
+btnExportar.textContent = "Exportar Quiz";
+btnExportar.style.position = "fixed";
+btnExportar.style.top = "10px";
+btnExportar.style.left = "10px";
+btnExportar.style.zIndex = "9999";
+btnExportar.addEventListener("click", exportarQuiz);
+document.body.appendChild(btnExportar);
+
+const btnImportar = document.createElement("button");
+btnImportar.textContent = "Importar Quiz";
+btnImportar.style.position = "fixed";
+btnImportar.style.top = "10px";
+btnImportar.style.left = "150px";
+btnImportar.style.zIndex = "9999";
+btnImportar.addEventListener("click", importarQuiz);
+document.body.appendChild(btnImportar);
