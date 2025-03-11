@@ -63,28 +63,38 @@ function importarQuiz() {
             document.querySelector('input[name="titulo_abreviado"]').value = quizData.tituloAbreviado;
 
             // Verifica o número de questões já criadas na página
-            const numeroDeQuestoesCriadas = document.querySelectorAll('textarea[name="pergunta"]').length;
-            console.log(`Questões antes da importação: ${numeroDeQuestoesCriadas}`);
+            let numeroDeQuestoesCriadas = document.querySelectorAll('textarea[name="pergunta"]').length;
+            console.log(`Questões no quiz importado: ${quizData.numeroQuestoes}`);
+            console.log(`Questões já existentes na página: ${numeroDeQuestoesCriadas}`);
+
+            if (numeroDeQuestoesCriadas === quizData.numeroQuestoes) {
+                console.log("Todas as questões já estão criadas.");
+                preencherQuestoes(quizData);
+                return;
+            }
 
             // Criar as questões restantes
             const questoesFaltando = quizData.numeroQuestoes - numeroDeQuestoesCriadas;
 
             function criarProximaQuestao(faltando) {
                 if (faltando > 0) {
-                    document.querySelector("#criar-pergunta").click();
                     console.log(`Criando questão ${quizData.numeroQuestoes - faltando + 1}/${quizData.numeroQuestoes}`);
-                    setTimeout(() => criarProximaQuestao(faltando - 1), 500);
+                    document.querySelector("#criar-pergunta").click();
+
+                    // Atualiza a contagem após um tempo
+                    setTimeout(() => {
+                        numeroDeQuestoesCriadas = document.querySelectorAll('textarea[name="pergunta"]').length;
+                        criarProximaQuestao(faltando - 1);
+                    }, 500);
                 } else {
-                    console.log("Todas as questões foram criadas.");
-                    preencherQuestoes(quizData);
+                    aguardarCriacaoQuestoes(() => {
+                        console.log("Todas as questões foram criadas. Preenchendo os dados...");
+                        preencherQuestoes(quizData);
+                    });
                 }
             }
 
-            if (questoesFaltando > 0) {
-                criarProximaQuestao(questoesFaltando);
-            } else {
-                preencherQuestoes(quizData);
-            }
+            criarProximaQuestao(questoesFaltando);
         };
 
         reader.readAsText(file);
@@ -93,35 +103,23 @@ function importarQuiz() {
     input.click();
 }
 
-function aguardarCriacaoQuestoesEclicarSalvar() {
-    const totalEsperado = document.querySelectorAll('textarea[name="pergunta"]').length;
-    
+// Função para aguardar a criação de todas as questões antes de preencher os dados
+function aguardarCriacaoQuestoes(callback) {
     let tentativas = 0;
-    const maxTentativas = 20; // Define um limite para evitar loops infinitos
+    const maxTentativas = 20;
 
     const intervalo = setInterval(() => {
         const totalAtual = document.querySelectorAll('textarea[name="pergunta"]').length;
+        console.log(`Tentativa ${tentativas + 1}: Criadas ${totalAtual} questões`);
 
-        console.log(`Tentativa ${tentativas + 1}: Criadas ${totalAtual}/${totalEsperado} questões`);
-
-        if (totalAtual >= totalEsperado || tentativas >= maxTentativas) {
+        if (totalAtual >= document.querySelectorAll('textarea[name="pergunta"]').length || tentativas >= maxTentativas) {
             clearInterval(intervalo);
-            console.log("Todas as questões foram criadas. Clicando no botão Salvar...");
-
-            const botaoSalvar = [...document.querySelectorAll("#btnSalvar")]
-                .find(btn => btn.textContent.trim() === "Salvar");
-
-            if (botaoSalvar) {
-                botaoSalvar.click();
-            } else {
-                console.log("Botão 'Salvar' não encontrado.");
-            }
+            callback();
         }
 
         tentativas++;
-    }, 500); // Verifica a cada 500ms
+    }, 500);
 }
-
 function preencherQuestoes(quizData) {
     setTimeout(() => {
         const perguntas = document.querySelectorAll('textarea[name="pergunta"]');
